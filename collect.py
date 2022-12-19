@@ -5,7 +5,6 @@ import re
 from datetime import datetime
 
 
-
 url_ = 'https://www.nrcha.com/show-results/'
 current_year = datetime.now().year
 
@@ -14,7 +13,6 @@ for y_ in range(2000, current_year + 2):
     items = []
 
     print(f':: {y_} ::')
-
 
     headers = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -37,14 +35,10 @@ for y_ in range(2000, current_year + 2):
         'showyear': f'{y_}',
     }
 
-
     with requests.Session() as session:
         # response = session.get(url=url_, headers=headers)
         response = requests.post('https://www.nrchadata.com/pdf/news/prod/ShowResults.asp', headers=headers, data=data)
         # print(f'{y_} ---> {response}')
-
-
-
         soup = BeautifulSoup(response.text, 'lxml')
         items_ = soup.find_all('span', class_='bodyTextBoldMed')#.split('<br>')
 
