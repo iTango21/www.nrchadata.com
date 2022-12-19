@@ -8,6 +8,7 @@ from fake_useragent import UserAgent
 
 import datetime
 import os
+import sys
 
 # from random import randrange
 ua = UserAgent()
@@ -15,17 +16,12 @@ ua_ = ua.random
 
 
 
+my_path_ = './data/all'
+
+
 def my_makedirs(path):
     if not os.path.isdir(path):
         os.makedirs(path)
-
-
-
-# headers = {
-#     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-#     "User-Agent": f'{ua}'  # "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,
-#     # like Gecko) Chrome/96.0.4664.45 Safari/537.36"
-# }
 
 headers = {
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -49,114 +45,119 @@ headers = {
 
 print('start...')
 
-id_ = 6993
 
-url_start_ = f'https://www.nrchadata.com/pdf/news/prod/ShowResultsDetails.asp?sid={id_}'
+y_ = 2000
 
-with requests.Session() as session:
-    response = session.get(url=url_start_, headers=headers)
+a = 'data\\collect\\'
+n = os.path.join(os.getcwd(), os.path.normpath(a))
 
-    soup = BeautifulSoup(response.text, 'lxml')
-    name__ = soup.find('span')#.split('<br>')
+with open(os.path.join(n, f'collect_{y_}.json'), 'r', encoding='utf-8') as set_:
+    set_data = json.load(set_)
 
-    print(name__)
+for i in set_data:
+    sid = i['sid']
+    event = i['event']
 
-    for i, x in enumerate(name__):
-        if i == 0:
-            print(f'{i} ---> {x}')
+    # print(f'{sid} --->>> {event}')
+    # sid = 2266
 
-            xx = str(x).split(' - ')
-            data__ = (xx[-1]).strip()
-            dir_y__ = data__.split('/')[-1]
+    url_start_ = f'https://www.nrchadata.com/pdf/news/prod/ShowResultsDetails.asp?sid={sid}'
 
-            print(data__)
+    with requests.Session() as session:
+        response = session.get(url=url_start_, headers=headers)
 
-            # print(datetime.datetime.strptime(data_, '%Y-%m-%d %H:%M:%S').strftime('%m/%d %a %H:%M'))
-            data_ = datetime.datetime.strptime(data__, '%m/%d/%Y').strftime('%Y%m%d')
-            name__ = str(xx[0:-1])
+        soup = BeautifulSoup(response.text, 'lxml')
+        name__ = soup.find('span')#.split('<br>')
 
-            name__ = f'{str(xx[0:-1])}' \
-                .replace("['", "") \
-                .replace("']", "") \
-                .replace("'", "") \
-                .replace(",", "") \
-                .replace("?", "") \
-                .replace("#", "") \
-                .replace(" ", "_") \
-                .replace("\\", "") \
-                .replace("/", "") \
-                .replace('"', '=') \
-                .replace("*", "")
+        # print(name__)
 
+        for i, x in enumerate(name__):
+            if i == 0:
+                # print(f'{i} ---> {x}')
 
-            full_name_ = f'{data_}_{name__}'
-            print(full_name_)
-            # for y in xx:
-            #     print(y)
+                xx = str(x).split(' - ')
+                data__ = (xx[-1]).strip()
+                dir_y__ = data__.split('/')[-1]
 
-    items_ = []
-    titles = soup.find_all('span', class_='bodyTextBold')#.text
+                # print(data__)
 
-    for i in titles:
-        file_name = i.text
-        # items_.append(i)
-
-    file_name__ = '123'
-
-    col__ = soup.find_all('table')[1]
-    col_ = col__.find('tr')#.find_all('td', class_='bodyTextBold')
-    print(col_)
-    for i in col_:
-        print(i.text)
+                # print(datetime.datetime.strptime(data_, '%Y-%m-%d %H:%M:%S').strftime('%m/%d %a %H:%M'))
+                year_ = datetime.datetime.strptime(data__, '%m/%d/%Y').strftime('%Y')
+                my_makedirs(f'{my_path_}/{year_}')
 
 
 
-    # dirr_ = f'{dir_y__}/{id_}_{full_name_}'
-    # my_makedirs(dirr_)
-    #
-    # with open(f'{dirr_}/{file_name__}.json', 'w', encoding='utf-8') as file:
-    #     json.dump(items_, file, indent=4, ensure_ascii=False)
+                data_ = datetime.datetime.strptime(data__, '%m/%d/%Y').strftime('%Y%m%d')
+                name__ = str(xx[0:-1])
 
+                name__ = f'{str(xx[0:-1])}' \
+                    .replace("['", "") \
+                    .replace("']", "") \
+                    .replace("'", "") \
+                    .replace(",", "") \
+                    .replace("?", "") \
+                    .replace("#", "") \
+                    .replace(" ", "_") \
+                    .replace("\\", "") \
+                    .replace("/", "") \
+                    .replace('"', '=') \
+                    .replace("*", "")
 
-    # strong__ = soup.find('div', id='panel_contacts').find_all('strong')
+                full_name_ = f'{data_}_{sid}_{name__}'
 
-breakpoint()
+                my_makedirs(f'{my_path_}/{year_}/{full_name_}')
 
+        items_ = []
+        titles = soup.find_all('span', class_='bodyTextBold')#.text
 
+        for i in titles:
+            file_name = i.text
 
+        all__ = soup.find_all('table')[1]
+        col_ = all__.find_all('td', class_='bodyTextBold')
 
+        colums_ = []
+        for i in col_:
+            colums_.append(i.text)
 
+        # print(f'{len(col_)} === {colums_}')
 
+        events_ = all__.find_all('span', class_='bodyTextBold')
 
+        trs_ = all__.find_all('tr')
 
+        ttt = 0
+        file_name_old_ = ''
+        file_name_ = ''
 
+        for i in trs_:
+            try:
+                events_ = i.find('span', class_='bodyTextBold')
+                file_name_old_ = file_name_
+                file_name_ = events_.text
 
+                if ttt != 0:
 
-# print(ua_)
-#
-# response = requests.get(f'{url_start_}', headers=headers)
-#
-# # printing request cookies
-# print(response.cookies.get_dict())
+                    with open(f'{my_path_}/{year_}/{full_name_}/{file_name_old_}.json', 'w', encoding='utf-8') as file:
+                        json.dump(info_, file, indent=4, ensure_ascii=False)
+                    info_ = []
 
+                ttt = 1
+                info_ = []
 
-print(url_start_)
+                print(f'--->>> {file_name_}')
+            except:
+                www = i.find_all('td', class_='bodyText')
 
+                value_ = []
 
-client = requests.session()
+                for c, eee in enumerate(www):
+                    ele_ = eee.text
+                    if ele_ == '-':
+                        ele_ = 'NONE'
 
-# Retrieve the CSRF token first
-client.get(url_start_)
+                    value_.append(ele_)
 
-php__ = client.cookies
-# php_ = php__['PHPSESSID']
-print(php__)
-print(php__.get_dict())
-
-
-
-breakpoint()
-#
-tok__ = json.loads(response.text)
-tok_ = tok__['access']
-# print(tok_)
+                tr_ = []
+                tr_ = dict(zip(colums_, value_))
+                info_.append(tr_)
