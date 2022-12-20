@@ -8,9 +8,16 @@ from datetime import datetime
 url_ = 'https://www.nrcha.com/show-results/'
 current_year = datetime.now().year
 
+
+
 for y_ in range(2000, current_year + 2):
 
-    items = []
+    info_ = []
+
+    events = []
+    e_date = []
+    sids = []
+
 
     print(f':: {y_} ::')
 
@@ -45,14 +52,43 @@ for y_ in range(2000, current_year + 2):
         for i in items_:
             sid = str(re.findall(r'[0-9]+', i.find('a').get('href'))).replace("['", "").replace("']", "")
 
-            print(f'\t{sid} ---> {i.text}')
-
-            items.append(
+            sids.append(
                 {
-                    "sid": sid,
+                    "sid": sid
+                }
+            )
+            events.append(
+                {
                     "event": i.text
                 }
             )
 
+        items_date_ = soup.find_all('span', class_='bodyText')
+
+        for i in items_date_:
+            date__ = i.text
+            date_ = date__.split(" -- ")[-1]
+
+            print(f'\t---> {date_}')
+
+            e_date.append(
+                {
+                    "date": date_
+                }
+            )
+
+        # tr_ = []
+        # tr_ = dict(zip(items, items_date, sids))
+        # info_.append(tr_)
+
+        for i, x in enumerate(events):
+            info_.append(
+                {
+                    "sid": sids[i]["sid"],
+                    "event": x["event"],
+                    "date": e_date[i]["date"]
+                }
+            )
+
     with open(f'./data/collect/collect_{y_}.json', 'w', encoding='utf-8') as file:
-        json.dump(items, file, indent=4, ensure_ascii=False)
+        json.dump(info_, file, indent=4, ensure_ascii=False)
