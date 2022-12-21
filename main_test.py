@@ -45,10 +45,10 @@ headers = {
     'sec-ch-ua-platform': '"Windows"',
 }
 
-print('start...')
+print(f'start...\n')
 
 
-y_ = 2007
+y_ = 2023
 
 a = 'data\\collect\\'
 n = os.path.join(os.getcwd(), os.path.normpath(a))
@@ -67,7 +67,7 @@ for i in set_data:
     event = i['event']
     count_sid += 1
 
-    print(f'\t[{count_sid} of {len_}]   SID: {sid} --->>> EVENT: {event}')
+    print(f'\n\t[{count_sid} of {len_}]   SID: {sid} _______ EVENT: {event}')
     # sid = 6640
 
     url_start_ = f'https://www.nrchadata.com/pdf/news/prod/ShowResultsDetails.asp?sid={sid}'
