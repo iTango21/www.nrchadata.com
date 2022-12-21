@@ -18,6 +18,7 @@ ua_ = ua.random
 
 
 my_path_ = './data/all'
+year_ = ''
 
 
 def my_makedirs(path):
@@ -47,7 +48,7 @@ headers = {
 print('start...')
 
 
-y_ = 2023
+y_ = 2007
 
 a = 'data\\collect\\'
 n = os.path.join(os.getcwd(), os.path.normpath(a))
@@ -55,12 +56,19 @@ n = os.path.join(os.getcwd(), os.path.normpath(a))
 with open(os.path.join(n, f'collect_{y_}.json'), 'r', encoding='utf-8') as set_:
     set_data = json.load(set_)
 
+len_ = len(set_data)
+count_sid = 0
+
+print(f'Find: {len_} sids!')
+err_sids = []
+
 for i in set_data:
     sid = i['sid']
     event = i['event']
+    count_sid += 1
 
-    # print(f'{sid} --->>> {event}')
-    # sid = 2266
+    print(f'\t[{count_sid} of {len_}]   SID: {sid} --->>> EVENT: {event}')
+    # sid = 6640
 
     url_start_ = f'https://www.nrchadata.com/pdf/news/prod/ShowResultsDetails.asp?sid={sid}'
 
@@ -68,130 +76,163 @@ for i in set_data:
         response = session.get(url=url_start_, headers=headers)
 
         soup = BeautifulSoup(response.text, 'lxml')
-        name__ = soup.find('span')#.split('<br>')
 
-        # print(name__)
+        try:
+            name__ = soup.find('span')#.split('<br>')
 
-        for i, x in enumerate(name__):
-            if i == 0:
-                # print(f'{i} ---> {x}')
+            # print(name__)
 
-                xx = str(x).split(' - ')
-                data__ = (xx[-1]).strip()
-                dir_y__ = data__.split('/')[-1]
+            for i, x in enumerate(name__):
+                if i == 0:
+                    # print(f'{i} ---> {x}')
 
-                # print(data__)
+                    xx = str(x).split(' - ')
+                    data__ = (xx[-1]).strip()
+                    dir_y__ = data__.split('/')[-1]
 
-                # print(datetime.datetime.strptime(data_, '%Y-%m-%d %H:%M:%S').strftime('%m/%d %a %H:%M'))
-                year_ = datetime.datetime.strptime(data__, '%m/%d/%Y').strftime('%Y')
-                my_makedirs(f'{my_path_}/{year_}_TEST')
+                    # print(data__)
+
+                    # print(datetime.datetime.strptime(data_, '%Y-%m-%d %H:%M:%S').strftime('%m/%d %a %H:%M'))
+                    year_ = datetime.datetime.strptime(data__, '%m/%d/%Y').strftime('%Y')
+                    my_makedirs(f'{my_path_}/{year_}_TEST')
 
 
 
-                data_ = datetime.datetime.strptime(data__, '%m/%d/%Y').strftime('%Y%m%d')
-                name__ = str(xx[0:-1])
+                    data_ = datetime.datetime.strptime(data__, '%m/%d/%Y').strftime('%Y%m%d')
+                    name__ = str(xx[0:-1])
 
-                name__ = f'{str(xx[0:-1])}' \
-                    .replace("['", "") \
-                    .replace("']", "") \
-                    .replace("'", "") \
-                    .replace(",", "") \
-                    .replace("?", "") \
-                    .replace("#", "") \
-                    .replace(" ", "_") \
-                    .replace("\\", "") \
-                    .replace("/", "") \
-                    .replace('"', '=') \
-                    .replace("*", "")
+                    name__ = f'{str(xx[0:-1])}' \
+                        .replace(":", "") \
+                        .replace("['", "") \
+                        .replace("']", "") \
+                        .replace("'", "") \
+                        .replace(",", "") \
+                        .replace("?", "") \
+                        .replace("#", "") \
+                        .replace(" ", "_") \
+                        .replace("\\", "") \
+                        .replace("/", "") \
+                        .replace('"', '=') \
+                        .replace("*", "")
 
-                full_name_ = f'{data_}_{sid}_{name__}'
+                    full_name_ = f'{data_}_{sid}_{name__}'
 
-                my_makedirs(f'{my_path_}/{year_}_TEST/{full_name_}')
+                    my_makedirs(f'{my_path_}/{year_}_TEST/{full_name_}')
 
-        items_ = []
-        titles = soup.find_all('span', class_='bodyTextBold')#.text
+            items_ = []
+            titles = soup.find_all('span', class_='bodyTextBold')#.text
 
-        for i in titles:
-            file_name = i.text
+            for i in titles:
+                file_name = i.text
 
-        all__ = soup.find_all('table')[1]
-        col_ = all__.find_all('td', class_='bodyTextBold')
+            all__ = soup.find_all('table')[1]
+            col_ = all__.find_all('td', class_='bodyTextBold')
 
-        colums_ = []
-        colums_sd = []
+            colums_ = []
+            colums_sd = []
 
-        for i in col_:
-            colums_.append(i.text)
-            colums_sd.append(i.text)
+            for i in col_:
+                colums_.append(i.text)
+                colums_sd.append(i.text)
 
-        colums_sd.insert(2, 'Sire')
-        colums_sd.insert(3, 'Dam')
+            colums_sd.insert(2, 'Sire')
+            colums_sd.insert(3, 'Dam')
 
-        # print(f'{len(col_)} === {colums_}')
+            # print(f'{len(col_)} === {colums_}')
 
-        events_ = all__.find_all('span', class_='bodyTextBold')
+            events_ = all__.find_all('span', class_='bodyTextBold')
 
-        trs_ = all__.find_all('tr')
+            trs_ = all__.find_all('tr')
 
-        ttt = 0
-        file_name_old_ = ''
-        file_name_ = ''
+            ttt = 0
+            file_name_old_ = ''
+            file_name_ = ''
 
-        for i in trs_:
-            try:
-                events_ = i.find('span', class_='bodyTextBold')
-                file_name_old_ = file_name_
-                file_name_ = events_.text
+            wr_ = False
 
-                if ttt != 0:
+            for i in trs_:
+                try:
+                    events_ = i.find('span', class_='bodyTextBold')
+                    wr_ = True
+                    file_name_old_ = file_name_
+                    file_name_ = events_.text \
+                        .replace(":", "") \
+                        .replace("['", "") \
+                        .replace("']", "") \
+                        .replace("'", "") \
+                        .replace(",", "") \
+                        .replace("?", "") \
+                        .replace("#", "") \
+                        .replace(" ", "_") \
+                        .replace("\\", "") \
+                        .replace("/", "") \
+                        .replace('"', '=') \
+                        .replace("*", "")
 
-                    with open(f'{my_path_}/{year_}_TEST/{full_name_}/{file_name_old_}.json', 'w', encoding='utf-8') as file:
-                        json.dump(info_, file, indent=4, ensure_ascii=False)
+                    if ttt != 0:
+
+                        with open(f'{my_path_}/{year_}_TEST/{full_name_}/{file_name_old_}.json', 'w', encoding='utf-8') as file:
+                            json.dump(info_, file, indent=4, ensure_ascii=False)
+                        info_ = []
+                        wr_ = False
+
+                    ttt = 1
                     info_ = []
 
-                ttt = 1
-                info_ = []
+                    print(f'\t\t--->>> {file_name_}')
 
-                print(f'--->>> {file_name_}')
+                except:
+                    www = i.find_all('td', class_='bodyText')
 
-            except:
-                www = i.find_all('td', class_='bodyText')
+                    value_ = []
+                    bool_sd_ = False
 
-                value_ = []
-                bool_sd_ = False
+                    for c, eee in enumerate(www):
+                        if c == 1:
+                            tmp__ = eee.text
+                            # script_ = str(re.findall('\((.*?)\)', str(tmp_))). \
+                            #     replace("['", ""). \
+                            #     replace("']", "")#.split('%2C')
+                            # print(script_)
+                            try:
+                                tmp_ = tmp__.split('(')
+                                # Horse name
+                                ele_ = tmp_[0]
+                                # Sire & Dam
+                                tmp2__ = str(tmp_[1]).replace(')', '').split(' X ')
+                                Sire_ = tmp2__[0]
+                                Dam_ = tmp2__[1]
 
-                for c, eee in enumerate(www):
-                    if c == 1:
-                        tmp__ = eee.text
-                        # script_ = str(re.findall('\((.*?)\)', str(tmp_))). \
-                        #     replace("['", ""). \
-                        #     replace("']", "")#.split('%2C')
-                        # print(script_)
-                        try:
-                            tmp_ = tmp__.split('(')
-                            # Horse name
-                            ele_ = tmp_[0]
-                            # Sire & Dam
-                            tmp2__ = str(tmp_[1]).replace(')', '').split(' X ')
-                            Sire_ = tmp2__[0]
-                            Dam_ = tmp2__[1]
+                                bool_sd_ = True
+                                value_.append(ele_)
+                                value_.append(Sire_)
+                                value_.append(Dam_)
+                            except:
+                                value_.append(ele_)
+                        else:
+                            ele_ = eee.text
+                            if ele_ == '-':
+                                ele_ = 'NONE'
 
-                            bool_sd_ = True
                             value_.append(ele_)
-                            value_.append(Sire_)
-                            value_.append(Dam_)
-                        except:
-                            value_.append(ele_)
+
+                    tr_ = []
+                    if bool_sd_ == True:
+                        tr_ = dict(zip(colums_sd, value_))
                     else:
-                        ele_ = eee.text
-                        if ele_ == '-':
-                            ele_ = 'NONE'
+                        tr_ = dict(zip(colums_, value_))
+                    info_.append(tr_)
+            if wr_ == True:
+                wr_ = False
+                with open(f'{my_path_}/{year_}_TEST/{full_name_}/{file_name_old_}.json', 'w', encoding='utf-8') as file:
+                    json.dump(info_, file, indent=4, ensure_ascii=False)
+        except:
+            err_sids.append(
+                {
+                    "err_sid": sid
+                }
+            )
+            print(f'\t\t! ! ! ! !   ___ ERROR ___   !!!!!')
 
-                        value_.append(ele_)
-
-                tr_ = []
-                if bool_sd_ == True:
-                    tr_ = dict(zip(colums_sd, value_))
-                else:
-                    tr_ = dict(zip(colums_, value_))
-                info_.append(tr_)
+with open(f'{my_path_}/err_sids.json', 'w', encoding='utf-8') as file:
+    json.dump(err_sids, file, indent=4, ensure_ascii=False)
