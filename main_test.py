@@ -73,7 +73,7 @@ for i in set_data:
     url_start_ = f'https://www.nrchadata.com/pdf/news/prod/ShowResultsDetails.asp?sid={sid}'
 
     with requests.Session() as session:
-        response = session.get(url=url_start_, headers=headers)
+        response = session.get(url=url_start_, headers=headers, timeout=(1, 2))
 
         soup = BeautifulSoup(response.text, 'lxml')
 
